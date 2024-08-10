@@ -42,6 +42,18 @@
             height: 25px;
             cursor: pointer;
         }
+        .note .edit {
+            position: absolute;
+            top: 10px;
+            right: 40px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+        }
         #noteForm {
             display: flex;
             flex-direction: column;
@@ -77,20 +89,27 @@
 </div>
 
 <script>
+    let editIndex = null;
+
     document.getElementById('noteForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
         const title = document.getElementById('noteTitle').value;
         const content = document.getElementById('noteContent').value;
-
         const note = { title, content };
 
-        addNoteToDOM(note);
-        saveNoteToLocalStorage(note);
+        if (editIndex !== null) {
+            updateNoteInLocalStorage(note, editIndex);
+            editIndex = null;
+        } else {
+            saveNoteToLocalStorage(note);
+        }
+
         clearForm();
+        loadNotesFromLocalStorage();
     });
 
-    function addNoteToDOM(note) {
+    function addNoteToDOM(note, index) {
         const noteContainer = document.getElementById('notesContainer');
 
         const noteDiv = document.createElement('div');
@@ -106,11 +125,21 @@
         deleteButton.textContent = '×';
         deleteButton.addEventListener('click', function() {
             noteContainer.removeChild(noteDiv);
-            deleteNoteFromLocalStorage(note);
+            deleteNoteFromLocalStorage(index);
+        });
+
+        const editButton = document.createElement('button');
+        editButton.textContent = '✎';
+        editButton.classList.add('edit');
+        editButton.addEventListener('click', function() {
+            editIndex = index;
+            document.getElementById('noteTitle').value = note.title;
+            document.getElementById('noteContent').value = note.content;
         });
 
         noteDiv.appendChild(noteTitle);
         noteDiv.appendChild(noteContent);
+        noteDiv.appendChild(editButton);
         noteDiv.appendChild(deleteButton);
         
         noteContainer.appendChild(noteDiv);
@@ -127,15 +156,23 @@
         localStorage.setItem('notes', JSON.stringify(notes));
     }
 
-    function deleteNoteFromLocalStorage(noteToDelete) {
+    function updateNoteInLocalStorage(note, index) {
         let notes = JSON.parse(localStorage.getItem('notes')) || [];
-        notes = notes.filter(note => note.title !== noteToDelete.title || note.content !== noteToDelete.content);
+        notes[index] = note;
+        localStorage.setItem('notes', JSON.stringify(notes));
+    }
+
+    function deleteNoteFromLocalStorage(index) {
+        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+        notes.splice(index, 1);
         localStorage.setItem('notes', JSON.stringify(notes));
     }
 
     function loadNotesFromLocalStorage() {
         let notes = JSON.parse(localStorage.getItem('notes')) || [];
-        notes.forEach(note => addNoteToDOM(note));
+        const noteContainer = document.getElementById('notesContainer');
+        noteContainer.innerHTML = ''; // Clear current notes in DOM
+        notes.forEach((note, index) => addNoteToDOM(note, index));
     }
 
     // Load notes when the page is loaded
