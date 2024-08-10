@@ -82,27 +82,31 @@
         
         const title = document.getElementById('noteTitle').value;
         const content = document.getElementById('noteContent').value;
-        
-        addNoteToDOM(title, content);
+
+        const note = { title, content };
+
+        addNoteToDOM(note);
+        saveNoteToLocalStorage(note);
         clearForm();
     });
 
-    function addNoteToDOM(title, content) {
+    function addNoteToDOM(note) {
         const noteContainer = document.getElementById('notesContainer');
 
         const noteDiv = document.createElement('div');
         noteDiv.classList.add('note');
         
         const noteTitle = document.createElement('h2');
-        noteTitle.textContent = title;
+        noteTitle.textContent = note.title;
 
         const noteContent = document.createElement('p');
-        noteContent.textContent = content;
+        noteContent.textContent = note.content;
 
         const deleteButton = document.createElement('button');
         deleteButton.textContent = '×';
         deleteButton.addEventListener('click', function() {
             noteContainer.removeChild(noteDiv);
+            deleteNoteFromLocalStorage(note);
         });
 
         noteDiv.appendChild(noteTitle);
@@ -116,6 +120,26 @@
         document.getElementById('noteTitle').value = '';
         document.getElementById('noteContent').value = '';
     }
+
+    function saveNoteToLocalStorage(note) {
+        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+        notes.push(note);
+        localStorage.setItem('notes', JSON.stringify(notes));
+    }
+
+    function deleteNoteFromLocalStorage(noteToDelete) {
+        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+        notes = notes.filter(note => note.title !== noteToDelete.title || note.content !== noteToDelete.content);
+        localStorage.setItem('notes', JSON.stringify(notes));
+    }
+
+    function loadNotesFromLocalStorage() {
+        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+        notes.forEach(note => addNoteToDOM(note));
+    }
+
+    // Load notes when the page is loaded
+    window.onload = loadNotesFromLocalStorage;
 </script>
 
 </body>
