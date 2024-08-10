@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .note {
+            background-color: #fafafa;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            position: relative;
+        }
+        .note button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+        }
+        #noteForm {
+            display: flex;
+            flex-direction: column;
+        }
+        #noteForm input, #noteForm textarea {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        #noteForm button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Notes Tracker</h1>
+    
+    <form id="noteForm">
+        <input type="text" id="noteTitle" placeholder="Title" required>
+        <textarea id="noteContent" rows="4" placeholder="Write your note here..." required></textarea>
+        <button type="submit">Add Note</button>
+    </form>
+
+    <div id="notesContainer"></div>
+</div>
+
+<script>
+    document.getElementById('noteForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const title = document.getElementById('noteTitle').value;
+        const content = document.getElementById('noteContent').value;
+        
+        addNoteToDOM(title, content);
+        clearForm();
+    });
+
+    function addNoteToDOM(title, content) {
+        const noteContainer = document.getElementById('notesContainer');
+
+        const noteDiv = document.createElement('div');
+        noteDiv.classList.add('note');
+        
+        const noteTitle = document.createElement('h2');
+        noteTitle.textContent = title;
+
+        const noteContent = document.createElement('p');
+        noteContent.textContent = content;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = '×';
+        deleteButton.addEventListener('click', function() {
+            noteContainer.removeChild(noteDiv);
+        });
+
+        noteDiv.appendChild(noteTitle);
+        noteDiv.appendChild(noteContent);
+        noteDiv.appendChild(deleteButton);
+        
+        noteContainer.appendChild(noteDiv);
+    }
+
+    function clearForm() {
+        document.getElementById('noteTitle').value = '';
+        document.getElementById('noteContent').value = '';
+    }
+</script>
+
+</body>
+</html>
