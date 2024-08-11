@@ -72,12 +72,21 @@
             cursor: pointer;
             border-radius: 5px;
         }
+        #searchBar {
+            margin-bottom: 20px;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Notes Tracker</h1>
+    
+    <input type="text" id="searchBar" placeholder="Search your notes...">
     
     <form id="noteForm">
         <input type="text" id="noteTitle" placeholder="Title" required>
@@ -107,6 +116,10 @@
 
         clearForm();
         loadNotesFromLocalStorage();
+    });
+
+    document.getElementById('searchBar').addEventListener('input', function() {
+        loadNotesFromLocalStorage(this.value);
     });
 
     function addNoteToDOM(note, index) {
@@ -168,11 +181,15 @@
         localStorage.setItem('notes', JSON.stringify(notes));
     }
 
-    function loadNotesFromLocalStorage() {
+    function loadNotesFromLocalStorage(searchQuery = '') {
         let notes = JSON.parse(localStorage.getItem('notes')) || [];
         const noteContainer = document.getElementById('notesContainer');
         noteContainer.innerHTML = ''; // Clear current notes in DOM
-        notes.forEach((note, index) => addNoteToDOM(note, index));
+
+        notes
+            .filter(note => note.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            note.content.toLowerCase().includes(searchQuery.toLowerCase()))
+            .forEach((note, index) => addNoteToDOM(note, index));
     }
 
     // Load notes when the page is loaded
