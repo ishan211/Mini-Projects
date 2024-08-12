@@ -22,7 +22,7 @@
         h1 {
             text-align: center;
         }
-        input[type="text"], button {
+        input[type="text"], input[type="date"], button {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -53,7 +53,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        li input[type="text"] {
+        li input[type="text"], li input[type="date"] {
             flex: 1;
             margin-right: 10px;
             padding: 5px;
@@ -80,6 +80,7 @@
 <div class="container">
     <h1>Todo Manager</h1>
     <input type="text" id="todoInput" placeholder="Enter todo">
+    <input type="date" id="dueDateInput">
     <button id="addTodoButton">Add Todo</button>
     <ul id="todoList"></ul>
 </div>
