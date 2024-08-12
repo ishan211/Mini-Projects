@@ -1,14 +1,24 @@
 // Retrieve todos from local storage or initialize with an empty array
 let todos = JSON.parse(localStorage.getItem('todos')) || [];
 
+// Request notification permission on page load
+if ('Notification' in window && Notification.permission !== 'granted') {
+    Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+            checkForDueTodos(); // Check for due todos on page load if notifications are allowed
+        }
+    });
+}
+
 // Event listener for adding a new todo
 document.getElementById('addTodoButton').addEventListener('click', function() {
     const todoText = document.getElementById('todoInput').value;
     const dueDate = document.getElementById('dueDateInput').value;
-    if (todoText && dueDate) { // Ensure both a todo and a due date are provided
+    if (todoText && dueDate) {
         todos.push({ text: todoText, dueDate: new Date(dueDate) });
         localStorage.setItem('todos', JSON.stringify(todos));
         renderTodos();
+        notifyUser(`Todo added: ${todoText}`, 'Scheduled for ' + new Date(dueDate).toLocaleDateString());
         document.getElementById('todoInput').value = '';
         document.getElementById('dueDateInput').value = '';
     }
@@ -65,6 +75,26 @@ function renderTodos() {
         li.appendChild(deleteButton);
         todoList.appendChild(li);
     });
+
+    checkForDueTodos(); // Check for due todos whenever the list is rendered
+}
+
+// Function to check for due todos and notify the user
+function checkForDueTodos() {
+    const now = new Date();
+    todos.forEach(todo => {
+        const dueTime = new Date(todo.dueDate).getTime();
+        if (dueTime <= now.getTime()) {
+            notifyUser(`Todo due: ${todo.text}`, 'Due on ' + new Date(todo.dueDate).toLocaleDateString());
+        }
+    });
+}
+
+// Function to show a notification
+function notifyUser(title, body) {
+    if (Notification.permission === 'granted') {
+        new Notification(title, { body });
+    }
 }
 
 // Initial rendering of the todos when the page loads
