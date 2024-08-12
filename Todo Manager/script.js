@@ -1,24 +1,53 @@
-// Retrieve todos from local storage or initialize with an empty array
-let todos = JSON.parse(localStorage.getItem('todos')) || [];
+// Retrieve todo lists from local storage or initialize with a default list
+let todoLists = JSON.parse(localStorage.getItem('todoLists')) || { 'Default': [] };
+let currentList = localStorage.getItem('currentList') || 'Default';
 
-// Request notification permission on page load
-if ('Notification' in window && Notification.permission !== 'granted') {
-    Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-            checkForDueTodos(); // Check for due todos on page load if notifications are allowed
+// Function to render the list selector dropdown and initialize the selected list
+function renderListSelector() {
+    const listSelect = document.getElementById('listSelect');
+    listSelect.innerHTML = '';
+    for (const listName in todoLists) {
+        const option = document.createElement('option');
+        option.value = listName;
+        option.textContent = listName;
+        if (listName === currentList) {
+            option.selected = true;
         }
-    });
+        listSelect.appendChild(option);
+    }
 }
+
+// Function to handle switching between todo lists
+document.getElementById('listSelect').addEventListener('change', function() {
+    currentList = this.value;
+    localStorage.setItem('currentList', currentList);
+    renderTodos();
+});
+
+// Function to create a new todo list
+document.getElementById('newListButton').addEventListener('click', function() {
+    const newListName = prompt('Enter the name of the new list:');
+    if (newListName && !todoLists[newListName]) {
+        todoLists[newListName] = [];
+        localStorage.setItem('todoLists', JSON.stringify(todoLists));
+        currentList = newListName;
+        localStorage.setItem('currentList', currentList);
+        renderListSelector();
+        renderTodos();
+    } else if (todoLists[newListName]) {
+        alert('A list with this name already exists.');
+    }
+});
 
 // Event listener for adding a new todo
 document.getElementById('addTodoButton').addEventListener('click', function() {
     const todoText = document.getElementById('todoInput').value;
     const dueDate = document.getElementById('dueDateInput').value;
     if (todoText && dueDate) {
-        todos.push({ text: todoText, dueDate: new Date(dueDate) });
-        localStorage.setItem('todos', JSON.stringify(todos));
+        todoLists[currentList].push({ text: todoText, dueDate: new Date(dueDate) });
+        localStorage.setItem('todoLists', JSON.stringify(todoLists));
         renderTodos();
-        notifyUser(`Todo added: ${todoText}`, 'Scheduled for ' + new Date(dueDate).toLocaleDateString());
+        notifyUser(`Todo added to ${currentList}: ${todoText}`, 'Scheduled for ' + new Date(dueDate).toLocaleDateString());
         document.getElementById('todoInput').value = '';
         document.getElementById('dueDateInput').value = '';
     }
@@ -28,9 +57,9 @@ document.getElementById('addTodoButton').addEventListener('click', function() {
 function renderTodos() {
     const todoList = document.getElementById('todoList');
     todoList.innerHTML = '';
-    todos.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)); // Sort todos by due date
+    todoLists[currentList].sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
 
-    todos.forEach((todo, index) => {
+    todoLists[currentList].forEach((todo, index) => {
         const li = document.createElement('li');
 
         const input = document.createElement('input');
@@ -40,7 +69,7 @@ function renderTodos() {
 
         const dateInput = document.createElement('input');
         dateInput.type = 'date';
-        dateInput.value = new Date(todo.dueDate).toISOString().split('T')[0]; // Set value to the due date
+        dateInput.value = new Date(todo.dueDate).toISOString().split('T')[0];
         dateInput.disabled = true;
 
         const editButton = document.createElement('button');
@@ -51,12 +80,12 @@ function renderTodos() {
                 dateInput.disabled = false;
                 editButton.textContent = 'Save';
             } else {
-                todos[index] = { text: input.value, dueDate: new Date(dateInput.value) };
-                localStorage.setItem('todos', JSON.stringify(todos));
+                todoLists[currentList][index] = { text: input.value, dueDate: new Date(dateInput.value) };
+                localStorage.setItem('todoLists', JSON.stringify(todoLists));
                 input.disabled = true;
                 dateInput.disabled = true;
                 editButton.textContent = 'Edit';
-                renderTodos(); // Re-render to update the order after editing
+                renderTodos();
             }
         });
 
@@ -64,8 +93,8 @@ function renderTodos() {
         deleteButton.textContent = 'Delete';
         deleteButton.className = 'delete';
         deleteButton.addEventListener('click', () => {
-            todos.splice(index, 1);
-            localStorage.setItem('todos', JSON.stringify(todos));
+            todoLists[currentList].splice(index, 1);
+            localStorage.setItem('todoLists', JSON.stringify(todoLists));
             renderTodos();
         });
 
@@ -82,7 +111,7 @@ function renderTodos() {
 // Function to check for due todos and notify the user
 function checkForDueTodos() {
     const now = new Date();
-    todos.forEach(todo => {
+    todoLists[currentList].forEach(todo => {
         const dueTime = new Date(todo.dueDate).getTime();
         if (dueTime <= now.getTime()) {
             notifyUser(`Todo due: ${todo.text}`, 'Due on ' + new Date(todo.dueDate).toLocaleDateString());
@@ -97,5 +126,15 @@ function notifyUser(title, body) {
     }
 }
 
-// Initial rendering of the todos when the page loads
+// Request notification permission on page load
+if ('Notification' in window && Notification.permission !== 'granted') {
+    Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+            checkForDueTodos(); // Check for due todos on page load if notifications are allowed
+        }
+    });
+}
+
+// Initial rendering of the todo lists and todos when the page loads
+renderListSelector();
 renderTodos();

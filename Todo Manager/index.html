@@ -73,12 +73,37 @@
         li button.delete:hover {
             background-color: #cc0000;
         }
+        .list-selector {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .list-selector select {
+            width: 75%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .list-selector button {
+            width: 20%;
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+            color: white;
+            border: none;
+        }
+        .list-selector button:hover {
+            background-color: #138496;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Todo Manager</h1>
+    <div class="list-selector">
+        <select id="listSelect"></select>
+        <button id="newListButton">New List</button>
+    </div>
     <input type="text" id="todoInput" placeholder="Enter todo">
     <input type="date" id="dueDateInput">
     <button id="addTodoButton">Add Todo</button>
