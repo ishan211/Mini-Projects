@@ -15,7 +15,7 @@ function updateUIForLoggedInUser() {
     document.getElementById('welcomeMessage').textContent = `Welcome, ${currentUser}!`;
 
     todoLists = users[currentUser].todoLists;
-    currentList = Object.keys(todoLists)[0] || 'Default';
+    currentList = localStorage.getItem('currentList') || Object.keys(todoLists)[0] || 'Default';
     renderListSelector();
     renderTodos();
 }
@@ -63,6 +63,7 @@ document.getElementById('registerButton').addEventListener('click', function() {
 document.getElementById('logoutButton').addEventListener('click', function() {
     currentUser = null;
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('currentList');
     updateUIForLoggedOutUser();
 });
 
@@ -84,6 +85,7 @@ function renderListSelector() {
 // Function to handle switching between todo lists
 document.getElementById('listSelect').addEventListener('change', function() {
     currentList = this.value;
+    localStorage.setItem('currentList', currentList);
     renderTodos();
 });
 
@@ -95,6 +97,7 @@ document.getElementById('newListButton').addEventListener('click', function() {
         users[currentUser].todoLists = todoLists;
         localStorage.setItem('users', JSON.stringify(users));
         currentList = newListName;
+        localStorage.setItem('currentList', currentList);
         renderListSelector();
         renderTodos();
     } else if (todoLists[newListName]) {
