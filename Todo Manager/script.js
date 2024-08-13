@@ -1,6 +1,70 @@
-// Retrieve todo lists from local storage or initialize with a default list
-let todoLists = JSON.parse(localStorage.getItem('todoLists')) || { 'Default': [] };
-let currentList = localStorage.getItem('currentList') || 'Default';
+// Retrieve users from local storage or initialize with an empty object
+let users = JSON.parse(localStorage.getItem('users')) || {};
+let currentUser = localStorage.getItem('currentUser') || null;
+
+let todoLists = {};
+let currentList = '';
+
+function updateUIForLoggedInUser() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('logoutForm').style.display = 'block';
+    document.getElementById('listSelector').style.display = 'flex';
+    document.getElementById('todoInput').style.display = 'block';
+    document.getElementById('dueDateInput').style.display = 'block';
+    document.getElementById('addTodoButton').style.display = 'block';
+    document.getElementById('welcomeMessage').textContent = `Welcome, ${currentUser}!`;
+
+    todoLists = users[currentUser].todoLists;
+    currentList = Object.keys(todoLists)[0] || 'Default';
+    renderListSelector();
+    renderTodos();
+}
+
+function updateUIForLoggedOutUser() {
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('logoutForm').style.display = 'none';
+    document.getElementById('listSelector').style.display = 'none';
+    document.getElementById('todoInput').style.display = 'none';
+    document.getElementById('dueDateInput').style.display = 'none';
+    document.getElementById('addTodoButton').style.display = 'none';
+}
+
+// Login functionality
+document.getElementById('loginButton').addEventListener('click', function() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    if (users[username] && users[username].password === password) {
+        currentUser = username;
+        localStorage.setItem('currentUser', currentUser);
+        updateUIForLoggedInUser();
+    } else {
+        alert('Invalid username or password');
+    }
+});
+
+// Registration functionality
+document.getElementById('registerButton').addEventListener('click', function() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    if (!users[username]) {
+        users[username] = { password: password, todoLists: { 'Default': [] } };
+        localStorage.setItem('users', JSON.stringify(users));
+        currentUser = username;
+        localStorage.setItem('currentUser', currentUser);
+        updateUIForLoggedInUser();
+    } else {
+        alert('Username already exists');
+    }
+});
+
+// Logout functionality
+document.getElementById('logoutButton').addEventListener('click', function() {
+    currentUser = null;
+    localStorage.removeItem('currentUser');
+    updateUIForLoggedOutUser();
+});
 
 // Function to render the list selector dropdown and initialize the selected list
 function renderListSelector() {
@@ -20,7 +84,6 @@ function renderListSelector() {
 // Function to handle switching between todo lists
 document.getElementById('listSelect').addEventListener('change', function() {
     currentList = this.value;
-    localStorage.setItem('currentList', currentList);
     renderTodos();
 });
 
@@ -29,9 +92,9 @@ document.getElementById('newListButton').addEventListener('click', function() {
     const newListName = prompt('Enter the name of the new list:');
     if (newListName && !todoLists[newListName]) {
         todoLists[newListName] = [];
-        localStorage.setItem('todoLists', JSON.stringify(todoLists));
+        users[currentUser].todoLists = todoLists;
+        localStorage.setItem('users', JSON.stringify(users));
         currentList = newListName;
-        localStorage.setItem('currentList', currentList);
         renderListSelector();
         renderTodos();
     } else if (todoLists[newListName]) {
@@ -45,7 +108,8 @@ document.getElementById('addTodoButton').addEventListener('click', function() {
     const dueDate = document.getElementById('dueDateInput').value;
     if (todoText && dueDate) {
         todoLists[currentList].push({ text: todoText, dueDate: new Date(dueDate) });
-        localStorage.setItem('todoLists', JSON.stringify(todoLists));
+        users[currentUser].todoLists = todoLists;
+        localStorage.setItem('users', JSON.stringify(users));
         renderTodos();
         notifyUser(`Todo added to ${currentList}: ${todoText}`, 'Scheduled for ' + new Date(dueDate).toLocaleDateString());
         document.getElementById('todoInput').value = '';
@@ -81,7 +145,8 @@ function renderTodos() {
                 editButton.textContent = 'Save';
             } else {
                 todoLists[currentList][index] = { text: input.value, dueDate: new Date(dateInput.value) };
-                localStorage.setItem('todoLists', JSON.stringify(todoLists));
+                users[currentUser].todoLists = todoLists;
+                localStorage.setItem('users', JSON.stringify(users));
                 input.disabled = true;
                 dateInput.disabled = true;
                 editButton.textContent = 'Edit';
@@ -94,7 +159,8 @@ function renderTodos() {
         deleteButton.className = 'delete';
         deleteButton.addEventListener('click', () => {
             todoLists[currentList].splice(index, 1);
-            localStorage.setItem('todoLists', JSON.stringify(todoLists));
+            users[currentUser].todoLists = todoLists;
+            localStorage.setItem('users', JSON.stringify(users));
             renderTodos();
         });
 
@@ -135,6 +201,9 @@ if ('Notification' in window && Notification.permission !== 'granted') {
     });
 }
 
-// Initial rendering of the todo lists and todos when the page loads
-renderListSelector();
-renderTodos();
+// Initial UI setup based on whether a user is logged in or not
+if (currentUser) {
+    updateUIForLoggedInUser();
+} else {
+    updateUIForLoggedOutUser();
+}

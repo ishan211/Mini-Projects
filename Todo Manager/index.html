@@ -22,7 +22,7 @@
         h1 {
             text-align: center;
         }
-        input[type="text"], input[type="date"], button {
+        input[type="text"], input[type="password"], input[type="date"], button {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -94,19 +94,37 @@
         .list-selector button:hover {
             background-color: #138496;
         }
+        .auth-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Todo Manager</h1>
-    <div class="list-selector">
+
+    <div class="auth-container" id="authContainer">
+        <div id="loginForm">
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button id="loginButton">Login</button>
+            <button id="registerButton">Register</button>
+        </div>
+        <div id="logoutForm" style="display: none;">
+            <p id="welcomeMessage"></p>
+            <button id="logoutButton">Logout</button>
+        </div>
+    </div>
+
+    <div class="list-selector" id="listSelector" style="display: none;">
         <select id="listSelect"></select>
         <button id="newListButton">New List</button>
     </div>
-    <input type="text" id="todoInput" placeholder="Enter todo">
-    <input type="date" id="dueDateInput">
-    <button id="addTodoButton">Add Todo</button>
+    <input type="text" id="todoInput" placeholder="Enter todo" style="display: none;">
+    <input type="date" id="dueDateInput" style="display: none;">
+    <button id="addTodoButton" style="display: none;">Add Todo</button>
     <ul id="todoList"></ul>
 </div>
 
