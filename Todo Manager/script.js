@@ -5,6 +5,7 @@ let currentUser = localStorage.getItem('currentUser') || null;
 let todoLists = {};
 let currentList = '';
 
+// Update UI for logged-in users
 function updateUIForLoggedInUser() {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('logoutForm').style.display = 'block';
@@ -20,6 +21,7 @@ function updateUIForLoggedInUser() {
     renderTodos();
 }
 
+// Update UI for logged-out users
 function updateUIForLoggedOutUser() {
     document.getElementById('loginForm').style.display = 'block';
     document.getElementById('logoutForm').style.display = 'none';
@@ -110,11 +112,13 @@ document.getElementById('addTodoButton').addEventListener('click', function() {
     const todoText = document.getElementById('todoInput').value;
     const dueDate = document.getElementById('dueDateInput').value;
     if (todoText && dueDate) {
-        todoLists[currentList].push({ text: todoText, dueDate: new Date(dueDate) });
+        const newTodo = { text: todoText, dueDate: new Date(dueDate) };
+        todoLists[currentList].push(newTodo);
         users[currentUser].todoLists = todoLists;
         localStorage.setItem('users', JSON.stringify(users));
         renderTodos();
-        notifyUser(`Todo added to ${currentList}: ${todoText}`, 'Scheduled for ' + new Date(dueDate).toLocaleDateString());
+        showPopup(`Todo added: ${todoText}`, 'Scheduled for ' + new Date(dueDate).toLocaleDateString());
+        scheduleNotification(newTodo);
         document.getElementById('todoInput').value = '';
         document.getElementById('dueDateInput').value = '';
     }
@@ -147,13 +151,15 @@ function renderTodos() {
                 dateInput.disabled = false;
                 editButton.textContent = 'Save';
             } else {
-                todoLists[currentList][index] = { text: input.value, dueDate: new Date(dateInput.value) };
+                const updatedTodo = { text: input.value, dueDate: new Date(dateInput.value) };
+                todoLists[currentList][index] = updatedTodo;
                 users[currentUser].todoLists = todoLists;
                 localStorage.setItem('users', JSON.stringify(users));
                 input.disabled = true;
                 dateInput.disabled = true;
                 editButton.textContent = 'Edit';
                 renderTodos();
+                scheduleNotification(updatedTodo);
             }
         });
 
@@ -161,10 +167,14 @@ function renderTodos() {
         deleteButton.textContent = 'Delete';
         deleteButton.className = 'delete';
         deleteButton.addEventListener('click', () => {
-            todoLists[currentList].splice(index, 1);
-            users[currentUser].todoLists = todoLists;
-            localStorage.setItem('users', JSON.stringify(users));
-            renderTodos();
+            const confirmDelete = window.confirm(`Are you sure you want to delete the todo: ${todo.text}?`);
+            if (confirmDelete) {
+                todoLists[currentList].splice(index, 1);
+                users[currentUser].todoLists = todoLists;
+                localStorage.setItem('users', JSON.stringify(users));
+                renderTodos();
+                showPopup('Todo deleted', `Todo: ${todo.text} has been deleted.`);
+            }
         });
 
         li.appendChild(input);
@@ -183,25 +193,27 @@ function checkForDueTodos() {
     todoLists[currentList].forEach(todo => {
         const dueTime = new Date(todo.dueDate).getTime();
         if (dueTime <= now.getTime()) {
-            notifyUser(`Todo due: ${todo.text}`, 'Due on ' + new Date(todo.dueDate).toLocaleDateString());
+            window.alert(`Todo due: ${todo.text}\nDue on ${new Date(todo.dueDate).toLocaleDateString()}`);
         }
     });
 }
 
-// Function to show a notification
-function notifyUser(title, body) {
-    if (Notification.permission === 'granted') {
-        new Notification(title, { body });
+// Function to show a popup using window.confirm
+function showPopup(message, description) {
+    window.confirm(`${message}\n${description}`);
+}
+
+// Function to schedule a notification (using window.alert)
+function scheduleNotification(todo) {
+    const now = new Date();
+    const dueTime = new Date(todo.dueDate).getTime();
+    const timeUntilDue = dueTime - now.getTime();
+
+    if (timeUntilDue > 0) {
+        setTimeout(() => {
+            window.alert(`Todo due: ${todo.text}\nDue now!`);
+        }, timeUntilDue);
     }
-}
-
-// Request notification permission on page load
-if ('Notification' in window && Notification.permission !== 'granted') {
-    Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-            checkForDueTodos(); // Check for due todos on page load if notifications are allowed
-        }
-    });
 }
 
 // Initial UI setup based on whether a user is logged in or not
