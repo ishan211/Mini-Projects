@@ -13,6 +13,7 @@ function updateUIForLoggedInUser() {
     document.getElementById('categorySelector').style.display = 'flex';
     document.getElementById('todoInput').style.display = 'block';
     document.getElementById('dueDateInput').style.display = 'block';
+    document.getElementById('dueTimeInput').style.display = 'block';
     document.getElementById('categoryInput').style.display = 'block';
     document.getElementById('addTodoButton').style.display = 'block';
     document.getElementById('welcomeMessage').textContent = `Welcome, ${currentUser}!`;
@@ -31,6 +32,7 @@ function updateUIForLoggedOutUser() {
     document.getElementById('categorySelector').style.display = 'none';
     document.getElementById('todoInput').style.display = 'none';
     document.getElementById('dueDateInput').style.display = 'none';
+    document.getElementById('dueTimeInput').style.display = 'none';
     document.getElementById('categoryInput').style.display = 'none';
     document.getElementById('addTodoButton').style.display = 'none';
 }
@@ -120,17 +122,19 @@ document.getElementById('newListButton').addEventListener('click', function() {
 document.getElementById('addTodoButton').addEventListener('click', function() {
     const todoText = document.getElementById('todoInput').value;
     const dueDate = document.getElementById('dueDateInput').value;
+    const dueTime = document.getElementById('dueTimeInput').value;
     const category = document.getElementById('categoryInput').value;
-    if (todoText && dueDate && category) {
-        const newTodo = { text: todoText, dueDate: new Date(dueDate), category: category };
+    if (todoText && dueDate && dueTime && category) {
+        const newTodo = { text: todoText, dueDate: `${dueDate}T${dueTime}:00`, category: category };
         todoLists[currentList].push(newTodo);
         users[currentUser].todoLists = todoLists;
         localStorage.setItem('users', JSON.stringify(users));
         renderTodos();
-        showPopup(`Todo added: ${todoText}`, `Scheduled for ${new Date(dueDate).toLocaleDateString()}`);
+        showPopup(`Todo added: ${todoText}`, `Scheduled for ${new Date(newTodo.dueDate).toLocaleString()}`);
         scheduleNotification(newTodo);
         document.getElementById('todoInput').value = '';
         document.getElementById('dueDateInput').value = '';
+        document.getElementById('dueTimeInput').value = '';
         document.getElementById('categoryInput').value = 'Work';
     }
 });
@@ -158,8 +162,13 @@ function renderTodos() {
 
         const dateInput = document.createElement('input');
         dateInput.type = 'date';
-        dateInput.value = new Date(todo.dueDate).toISOString().split('T')[0];
+        dateInput.value = todo.dueDate.split('T')[0];
         dateInput.disabled = true;
+
+        const timeInput = document.createElement('input');
+        timeInput.type = 'time';
+        timeInput.value = todo.dueDate.split('T')[1].slice(0, 5);
+        timeInput.disabled = true;
 
         const categoryInput = document.createElement('select');
         ['Work', 'Personal', 'Shopping'].forEach(category => {
@@ -176,18 +185,20 @@ function renderTodos() {
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
         editButton.addEventListener('click', () => {
-            if (input.disabled && dateInput.disabled && categoryInput.disabled) {
+            if (input.disabled && dateInput.disabled && timeInput.disabled && categoryInput.disabled) {
                 input.disabled = false;
                 dateInput.disabled = false;
+                timeInput.disabled = false;
                 categoryInput.disabled = false;
                 editButton.textContent = 'Save';
             } else {
-                const updatedTodo = { text: input.value, dueDate: new Date(dateInput.value), category: categoryInput.value };
+                const updatedTodo = { text: input.value, dueDate: `${dateInput.value}T${timeInput.value}:00`, category: categoryInput.value };
                 todoLists[currentList][index] = updatedTodo;
                 users[currentUser].todoLists = todoLists;
                 localStorage.setItem('users', JSON.stringify(users));
                 input.disabled = true;
                 dateInput.disabled = true;
+                timeInput.disabled = true;
                 categoryInput.disabled = true;
                 editButton.textContent = 'Edit';
                 renderTodos();
@@ -211,6 +222,7 @@ function renderTodos() {
 
         li.appendChild(input);
         li.appendChild(dateInput);
+        li.appendChild(timeInput);
         li.appendChild(categoryInput);
         li.appendChild(editButton);
         li.appendChild(deleteButton);
@@ -226,7 +238,7 @@ function checkForDueTodos() {
     todoLists[currentList].forEach(todo => {
         const dueTime = new Date(todo.dueDate).getTime();
         if (dueTime <= now.getTime()) {
-            window.alert(`Todo due: ${todo.text}\nDue on ${new Date(todo.dueDate).toLocaleDateString()}`);
+            window.alert(`Todo due: ${todo.text}\nDue on ${new Date(todo.dueDate).toLocaleString()}`);
         }
     });
 }

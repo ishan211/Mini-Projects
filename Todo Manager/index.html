@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo Manager</title>
+    <title>Todo Manager - Version 10</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -22,7 +22,7 @@
         h1 {
             text-align: center;
         }
-        input[type="text"], input[type="password"], input[type="date"], select, button {
+        input[type="text"], input[type="password"], input[type="date"], input[type="time"], select, button {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -53,7 +53,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        li input[type="text"], li input[type="date"], li select {
+        li input[type="text"], li input[type="date"], li input[type="time"], li select {
             flex: 1;
             margin-right: 10px;
             padding: 5px;
@@ -134,6 +134,7 @@
 
     <input type="text" id="todoInput" placeholder="Enter todo" style="display: none;">
     <input type="date" id="dueDateInput" style="display: none;">
+    <input type="time" id="dueTimeInput" style="display: none;">
     <select id="categoryInput" style="display: none;">
         <option value="Work">Work</option>
         <option value="Personal">Personal</option>
