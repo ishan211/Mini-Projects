@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo Manager</title>
+    <title>Todo Manager - Version 9</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -22,7 +22,7 @@
         h1 {
             text-align: center;
         }
-        input[type="text"], input[type="password"], input[type="date"], button {
+        input[type="text"], input[type="password"], input[type="date"], select, button {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -53,7 +53,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        li input[type="text"], li input[type="date"] {
+        li input[type="text"], li input[type="date"], li select {
             flex: 1;
             margin-right: 10px;
             padding: 5px;
@@ -73,25 +73,25 @@
         li button.delete:hover {
             background-color: #cc0000;
         }
-        .list-selector {
+        .list-selector, .category-selector {
             display: flex;
             justify-content: space-between;
             margin-bottom: 20px;
         }
-        .list-selector select {
+        .list-selector select, .category-selector select {
             width: 75%;
             padding: 10px;
             border-radius: 5px;
             border: 1px solid #ccc;
         }
-        .list-selector button {
+        .list-selector button, .category-selector button {
             width: 20%;
             background-color: #17a2b8;
             border-color: #17a2b8;
             color: white;
             border: none;
         }
-        .list-selector button:hover {
+        .list-selector button:hover, .category-selector button:hover {
             background-color: #138496;
         }
         .auth-container {
@@ -122,8 +122,23 @@
         <select id="listSelect"></select>
         <button id="newListButton">New List</button>
     </div>
+
+    <div class="category-selector" id="categorySelector" style="display: none;">
+        <select id="categoryFilter">
+            <option value="All">All Categories</option>
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+            <option value="Shopping">Shopping</option>
+        </select>
+    </div>
+
     <input type="text" id="todoInput" placeholder="Enter todo" style="display: none;">
     <input type="date" id="dueDateInput" style="display: none;">
+    <select id="categoryInput" style="display: none;">
+        <option value="Work">Work</option>
+        <option value="Personal">Personal</option>
+        <option value="Shopping">Shopping</option>
+    </select>
     <button id="addTodoButton" style="display: none;">Add Todo</button>
     <ul id="todoList"></ul>
 </div>

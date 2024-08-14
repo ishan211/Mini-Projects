@@ -10,8 +10,10 @@ function updateUIForLoggedInUser() {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('logoutForm').style.display = 'block';
     document.getElementById('listSelector').style.display = 'flex';
+    document.getElementById('categorySelector').style.display = 'flex';
     document.getElementById('todoInput').style.display = 'block';
     document.getElementById('dueDateInput').style.display = 'block';
+    document.getElementById('categoryInput').style.display = 'block';
     document.getElementById('addTodoButton').style.display = 'block';
     document.getElementById('welcomeMessage').textContent = `Welcome, ${currentUser}!`;
 
@@ -26,8 +28,10 @@ function updateUIForLoggedOutUser() {
     document.getElementById('loginForm').style.display = 'block';
     document.getElementById('logoutForm').style.display = 'none';
     document.getElementById('listSelector').style.display = 'none';
+    document.getElementById('categorySelector').style.display = 'none';
     document.getElementById('todoInput').style.display = 'none';
     document.getElementById('dueDateInput').style.display = 'none';
+    document.getElementById('categoryInput').style.display = 'none';
     document.getElementById('addTodoButton').style.display = 'none';
 }
 
@@ -91,6 +95,11 @@ document.getElementById('listSelect').addEventListener('change', function() {
     renderTodos();
 });
 
+// Function to handle category filtering
+document.getElementById('categoryFilter').addEventListener('change', function() {
+    renderTodos();
+});
+
 // Function to create a new todo list
 document.getElementById('newListButton').addEventListener('click', function() {
     const newListName = prompt('Enter the name of the new list:');
@@ -111,16 +120,18 @@ document.getElementById('newListButton').addEventListener('click', function() {
 document.getElementById('addTodoButton').addEventListener('click', function() {
     const todoText = document.getElementById('todoInput').value;
     const dueDate = document.getElementById('dueDateInput').value;
-    if (todoText && dueDate) {
-        const newTodo = { text: todoText, dueDate: new Date(dueDate) };
+    const category = document.getElementById('categoryInput').value;
+    if (todoText && dueDate && category) {
+        const newTodo = { text: todoText, dueDate: new Date(dueDate), category: category };
         todoLists[currentList].push(newTodo);
         users[currentUser].todoLists = todoLists;
         localStorage.setItem('users', JSON.stringify(users));
         renderTodos();
-        showPopup(`Todo added: ${todoText}`, 'Scheduled for ' + new Date(dueDate).toLocaleDateString());
+        showPopup(`Todo added: ${todoText}`, `Scheduled for ${new Date(dueDate).toLocaleDateString()}`);
         scheduleNotification(newTodo);
         document.getElementById('todoInput').value = '';
         document.getElementById('dueDateInput').value = '';
+        document.getElementById('categoryInput').value = 'Work';
     }
 });
 
@@ -128,9 +139,16 @@ document.getElementById('addTodoButton').addEventListener('click', function() {
 function renderTodos() {
     const todoList = document.getElementById('todoList');
     todoList.innerHTML = '';
-    todoLists[currentList].sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+    const selectedCategory = document.getElementById('categoryFilter').value;
+    let filteredTodos = todoLists[currentList];
 
-    todoLists[currentList].forEach((todo, index) => {
+    if (selectedCategory !== 'All') {
+        filteredTodos = filteredTodos.filter(todo => todo.category === selectedCategory);
+    }
+
+    filteredTodos.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+    filteredTodos.forEach((todo, index) => {
         const li = document.createElement('li');
 
         const input = document.createElement('input');
@@ -143,20 +161,34 @@ function renderTodos() {
         dateInput.value = new Date(todo.dueDate).toISOString().split('T')[0];
         dateInput.disabled = true;
 
+        const categoryInput = document.createElement('select');
+        ['Work', 'Personal', 'Shopping'].forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            if (category === todo.category) {
+                option.selected = true;
+            }
+            categoryInput.appendChild(option);
+        });
+        categoryInput.disabled = true;
+
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
         editButton.addEventListener('click', () => {
-            if (input.disabled && dateInput.disabled) {
+            if (input.disabled && dateInput.disabled && categoryInput.disabled) {
                 input.disabled = false;
                 dateInput.disabled = false;
+                categoryInput.disabled = false;
                 editButton.textContent = 'Save';
             } else {
-                const updatedTodo = { text: input.value, dueDate: new Date(dateInput.value) };
+                const updatedTodo = { text: input.value, dueDate: new Date(dateInput.value), category: categoryInput.value };
                 todoLists[currentList][index] = updatedTodo;
                 users[currentUser].todoLists = todoLists;
                 localStorage.setItem('users', JSON.stringify(users));
                 input.disabled = true;
                 dateInput.disabled = true;
+                categoryInput.disabled = true;
                 editButton.textContent = 'Edit';
                 renderTodos();
                 scheduleNotification(updatedTodo);
@@ -179,6 +211,7 @@ function renderTodos() {
 
         li.appendChild(input);
         li.appendChild(dateInput);
+        li.appendChild(categoryInput);
         li.appendChild(editButton);
         li.appendChild(deleteButton);
         todoList.appendChild(li);
