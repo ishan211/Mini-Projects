@@ -19,6 +19,15 @@ h1 {
     margin-bottom: 20px;
 }
 
+.summary {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.summary h3 {
+    margin: 10px 0;
+}
+
 .input-section {
     display: flex;
     justify-content: space-between;
