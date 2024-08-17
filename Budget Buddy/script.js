@@ -1,5 +1,6 @@
 let totalIncome = 0;
 let totalExpenses = 0;
+let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 
 function addTransaction() {
     const description = document.getElementById('description').value;
@@ -7,18 +8,15 @@ function addTransaction() {
     const category = document.getElementById('category').value;
 
     if (description !== '' && !isNaN(amount)) {
-        const transactionList = document.getElementById('transaction-list');
-        const listItem = document.createElement('li');
+        const transaction = {
+            description,
+            amount,
+            category
+        };
 
-        if (category === 'income') {
-            totalIncome += amount;
-        } else {
-            totalExpenses += Math.abs(amount);
-        }
-
-        listItem.innerHTML = `${description} - $${amount.toFixed(2)} <span class="category">[${category}]</span>`;
-        transactionList.appendChild(listItem);
-
+        transactions.push(transaction);
+        updateLocalStorage();
+        addTransactionToDOM(transaction);
         updateSummary();
 
         // Clear the input fields after adding
@@ -30,6 +28,20 @@ function addTransaction() {
     }
 }
 
+function addTransactionToDOM(transaction) {
+    const transactionList = document.getElementById('transaction-list');
+    const listItem = document.createElement('li');
+
+    if (transaction.category === 'income') {
+        totalIncome += transaction.amount;
+    } else {
+        totalExpenses += Math.abs(transaction.amount);
+    }
+
+    listItem.innerHTML = `${transaction.description} - $${transaction.amount.toFixed(2)} <span class="category">[${transaction.category}]</span>`;
+    transactionList.appendChild(listItem);
+}
+
 function updateSummary() {
     const balance = totalIncome - totalExpenses;
 
@@ -37,3 +49,14 @@ function updateSummary() {
     document.getElementById('total-expenses').textContent = totalExpenses.toFixed(2);
     document.getElementById('balance').textContent = balance.toFixed(2);
 }
+
+function updateLocalStorage() {
+    localStorage.setItem('transactions', JSON.stringify(transactions));
+}
+
+function init() {
+    transactions.forEach(addTransactionToDOM);
+    updateSummary();
+}
+
+init();
