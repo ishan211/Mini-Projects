@@ -29,6 +29,21 @@
             </select>
             <button onclick="addTransaction()">Add</button>
         </div>
+
+        <div class="filter-section">
+            <h2>Filter Transactions</h2>
+            <input type="date" id="filter-start-date">
+            <input type="date" id="filter-end-date">
+            <select id="filter-category">
+                <option value="all">All Categories</option>
+                <option value="income">Income</option>
+                <option value="food">Food</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="bills">Bills</option>
+                <option value="others">Others</option>
+            </select>
+            <button onclick="filterTransactions()">Filter</button>
+        </div>
         
         <div class="transactions">
             <h2>Transactions</h2>

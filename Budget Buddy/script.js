@@ -57,9 +57,36 @@ function updateLocalStorage() {
     localStorage.setItem('transactions', JSON.stringify(transactions));
 }
 
-function init() {
-    transactions.forEach(addTransactionToDOM);
+function filterTransactions() {
+    const startDate = document.getElementById('filter-start-date').value;
+    const endDate = document.getElementById('filter-end-date').value;
+    const filterCategory = document.getElementById('filter-category').value;
+
+    const filteredTransactions = transactions.filter(transaction => {
+        const transactionDate = new Date(transaction.date);
+        const startMatch = startDate ? transactionDate >= new Date(startDate) : true;
+        const endMatch = endDate ? transactionDate <= new Date(endDate) : true;
+        const categoryMatch = filterCategory === 'all' || transaction.category === filterCategory;
+
+        return startMatch && endMatch && categoryMatch;
+    });
+
+    renderTransactions(filteredTransactions);
+}
+
+function renderTransactions(filteredTransactions) {
+    const transactionList = document.getElementById('transaction-list');
+    transactionList.innerHTML = '';
+
+    totalIncome = 0;
+    totalExpenses = 0;
+
+    filteredTransactions.forEach(addTransactionToDOM);
     updateSummary();
+}
+
+function init() {
+    renderTransactions(transactions);
 }
 
 init();
