@@ -19,21 +19,34 @@ h1 {
     margin-bottom: 20px;
 }
 
+.summary {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.summary h3 {
+    margin: 10px 0;
+}
+
 .input-section {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
 }
 
-.input-section input {
-    width: 70%;
+.input-section input, .input-section select {
+    width: 20%;
     padding: 10px;
     border-radius: 4px;
     border: 1px solid #ccc;
 }
 
-.input-section button {
+#date {
     width: 25%;
+}
+
+.input-section button {
+    width: 15%;
     padding: 10px;
     background-color: #28a745;
     color: white;
