@@ -86,3 +86,25 @@ h1 {
     justify-content: space-between;
     border: 1px solid #ccc;
 }
+
+.transaction-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.transaction-actions button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.transaction-actions button.edit {
+    background-color: #007bff;
+}
+
+.transaction-actions button:hover {
+    opacity: 0.8;
+}

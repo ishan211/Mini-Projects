@@ -10,6 +10,7 @@ function addTransaction() {
 
     if (description !== '' && !isNaN(amount)) {
         const transaction = {
+            id: generateId(),
             description,
             amount,
             category,
@@ -34,6 +35,7 @@ function addTransaction() {
 function addTransactionToDOM(transaction) {
     const transactionList = document.getElementById('transaction-list');
     const listItem = document.createElement('li');
+    listItem.setAttribute('data-id', transaction.id);
 
     if (transaction.category === 'income') {
         totalIncome += transaction.amount;
@@ -41,8 +43,33 @@ function addTransactionToDOM(transaction) {
         totalExpenses += Math.abs(transaction.amount);
     }
 
-    listItem.innerHTML = `${transaction.date} - ${transaction.description} - $${transaction.amount.toFixed(2)} <span class="category">[${transaction.category}]</span>`;
+    listItem.innerHTML = `
+        ${transaction.date} - ${transaction.description} - $${transaction.amount.toFixed(2)} <span class="category">[${transaction.category}]</span>
+        <div class="transaction-actions">
+            <button class="edit" onclick="editTransaction('${transaction.id}')">Edit</button>
+            <button onclick="deleteTransaction('${transaction.id}')">Delete</button>
+        </div>
+    `;
     transactionList.appendChild(listItem);
+}
+
+function editTransaction(id) {
+    const transaction = transactions.find(t => t.id === id);
+
+    if (transaction) {
+        document.getElementById('description').value = transaction.description;
+        document.getElementById('amount').value = transaction.amount;
+        document.getElementById('category').value = transaction.category;
+        document.getElementById('date').value = transaction.date;
+
+        deleteTransaction(id); // Remove the old transaction so the new one can be added with updated info
+    }
+}
+
+function deleteTransaction(id) {
+    transactions = transactions.filter(transaction => transaction.id !== id);
+    updateLocalStorage();
+    renderTransactions(transactions);
 }
 
 function updateSummary() {
@@ -83,6 +110,10 @@ function renderTransactions(filteredTransactions) {
 
     filteredTransactions.forEach(addTransactionToDOM);
     updateSummary();
+}
+
+function generateId() {
+    return '_' + Math.random().toString(36).substr(2, 9);
 }
 
 function init() {
