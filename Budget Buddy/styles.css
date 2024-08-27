@@ -33,33 +33,36 @@ h1 {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
 .input-section input,
 .input-section select,
 .filter-section input,
 .filter-section select {
-    width: 20%;
+    width: calc(50% - 10px);
     padding: 10px;
     border-radius: 4px;
     border: 1px solid #ccc;
+    margin-bottom: 10px;
 }
 
 #date,
 #filter-start-date,
 #filter-end-date {
-    width: 25%;
+    width: calc(50% - 10px);
 }
 
 .input-section button,
 .filter-section button {
-    width: 15%;
+    width: calc(50% - 10px);
     padding: 10px;
     background-color: #28a745;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    margin-bottom: 10px;
 }
 
 .input-section button:hover,
@@ -85,6 +88,7 @@ h1 {
     display: flex;
     justify-content: space-between;
     border: 1px solid #ccc;
+    flex-wrap: wrap;
 }
 
 .transaction-actions {
@@ -107,4 +111,23 @@ h1 {
 
 .transaction-actions button:hover {
     opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .input-section input,
+    .input-section select,
+    .input-section button,
+    .filter-section input,
+    .filter-section select,
+    .filter-section button {
+        width: 100%;
+    }
+
+    #transaction-list li {
+        flex-direction: column;
+    }
+
+    .transaction-actions {
+        justify-content: flex-start;
+    }
 }
