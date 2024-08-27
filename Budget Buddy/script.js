@@ -1,7 +1,44 @@
 let totalIncome = 0;
 let totalExpenses = 0;
-let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+let transactions = [];
+let currentUser = null;
 let incomeExpenseChart;
+
+function login() {
+    const username = document.getElementById('username').value.trim();
+    if (username) {
+        currentUser = username;
+        loadUserData();
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('app-section').style.display = 'block';
+    } else {
+        alert('Please enter a username.');
+    }
+}
+
+function logout() {
+    currentUser = null;
+    transactions = [];
+    totalIncome = 0;
+    totalExpenses = 0;
+    document.getElementById('transaction-list').innerHTML = '';
+    updateSummary();
+    updateChart();
+    document.getElementById('login-section').style.display = 'block';
+    document.getElementById('app-section').style.display = 'none';
+}
+
+function loadUserData() {
+    const userData = JSON.parse(localStorage.getItem(`budget_${currentUser}`)) || [];
+    transactions = userData;
+    renderTransactions(transactions);
+    updateSummary();
+    updateChart();
+}
+
+function saveUserData() {
+    localStorage.setItem(`budget_${currentUser}`, JSON.stringify(transactions));
+}
 
 function addTransaction() {
     const description = document.getElementById('description').value;
@@ -19,7 +56,7 @@ function addTransaction() {
         };
 
         transactions.push(transaction);
-        updateLocalStorage();
+        saveUserData();
         addTransactionToDOM(transaction);
         updateSummary();
         updateChart();
@@ -70,7 +107,7 @@ function editTransaction(id) {
 
 function deleteTransaction(id) {
     transactions = transactions.filter(transaction => transaction.id !== id);
-    updateLocalStorage();
+    saveUserData();
     renderTransactions(transactions);
     updateChart();
 }
@@ -83,8 +120,9 @@ function updateSummary() {
     document.getElementById('balance').textContent = balance.toFixed(2);
 }
 
-function updateLocalStorage() {
-    localStorage.setItem('transactions', JSON.stringify(transactions));
+function updateChart() {
+    incomeExpenseChart.data.datasets[0].data = [totalIncome, totalExpenses];
+    incomeExpenseChart.update();
 }
 
 function filterTransactions() {
@@ -141,13 +179,7 @@ function initChart() {
     });
 }
 
-function updateChart() {
-    incomeExpenseChart.data.datasets[0].data = [totalIncome, totalExpenses];
-    incomeExpenseChart.update();
-}
-
 function init() {
-    renderTransactions(transactions);
     initChart();
 }
 
