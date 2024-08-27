@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget Tracker</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -48,6 +49,11 @@
         <div class="transactions">
             <h2>Transactions</h2>
             <ul id="transaction-list"></ul>
+        </div>
+
+        <div class="charts">
+            <h2>Summary Dashboard</h2>
+            <canvas id="incomeExpenseChart"></canvas>
         </div>
     </div>
 

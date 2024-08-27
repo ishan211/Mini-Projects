@@ -113,6 +113,10 @@ h1 {
     opacity: 0.8;
 }
 
+.charts {
+    margin-top: 40px;
+}
+
 @media (max-width: 768px) {
     .input-section input,
     .input-section select,

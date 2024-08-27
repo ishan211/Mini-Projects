@@ -1,6 +1,7 @@
 let totalIncome = 0;
 let totalExpenses = 0;
 let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+let incomeExpenseChart;
 
 function addTransaction() {
     const description = document.getElementById('description').value;
@@ -21,6 +22,7 @@ function addTransaction() {
         updateLocalStorage();
         addTransactionToDOM(transaction);
         updateSummary();
+        updateChart();
 
         // Clear the input fields after adding
         document.getElementById('description').value = '';
@@ -70,6 +72,7 @@ function deleteTransaction(id) {
     transactions = transactions.filter(transaction => transaction.id !== id);
     updateLocalStorage();
     renderTransactions(transactions);
+    updateChart();
 }
 
 function updateSummary() {
@@ -110,14 +113,42 @@ function renderTransactions(filteredTransactions) {
 
     filteredTransactions.forEach(addTransactionToDOM);
     updateSummary();
+    updateChart();
 }
 
 function generateId() {
     return '_' + Math.random().toString(36).substr(2, 9);
 }
 
+function initChart() {
+    const ctx = document.getElementById('incomeExpenseChart').getContext('2d');
+    incomeExpenseChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Income', 'Expenses'],
+            datasets: [{
+                label: 'Income vs Expenses',
+                data: [totalIncome, totalExpenses],
+                backgroundColor: ['#28a745', '#dc3545'],
+                borderColor: ['#28a745', '#dc3545'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+        }
+    });
+}
+
+function updateChart() {
+    incomeExpenseChart.data.datasets[0].data = [totalIncome, totalExpenses];
+    incomeExpenseChart.update();
+}
+
 function init() {
     renderTransactions(transactions);
+    initChart();
 }
 
 init();
